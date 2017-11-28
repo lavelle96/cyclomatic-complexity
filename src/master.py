@@ -24,12 +24,7 @@ api = Api(app)
 
 #Map of commits to their complexity, 0 if they havent been handled yet
 
-#Map of client ids to the commit they're working on and when they started the commit
-CLIENTS = {}
-
-COMMITS_FINISHED = False
-
-OVERALL_COMPLEXITY = 0
+#Map of client ids to the commit they're working on and when they started the commi
 
 
 def get_commit(COMMITS_MAP):
@@ -39,19 +34,31 @@ def get_commit(COMMITS_MAP):
     return None
 
 def end_check():
+    """
+    Thread that checks every second whether or not all commits have been completed
+    Also gives total complexity and time taken
+    """
     global resources
+    global resource_lock
     start = time.time()
     while(1):
         
         time.sleep(1)
-        print("Amount of Commits: ", resources.COMMIT_COUNT, " Commits finished: ", resources.COMPLETED_COMMITS)
+        resource_lock.acquire()
+        print('Commits completed: ', resources.COMPLETED_COMMITS)
         if resources.COMMIT_COUNT == resources.COMPLETED_COMMITS:
             end = time.time()
             time_taken = end-start #Recorded in seconds
+            no_clients = len(resources.CLIENTS)
             print("Final Complexity over ", resources.COMMIT_COUNT, " commits: ", resources.OVERALL_COMPLEXITY)
+            
             print("Time taken: ", str(time_taken), " seconds")
+            print("No of clients used: ", str(no_clients))
+            resource_lock.release()
             os.system("killall -KILL python")
+            sys.exit()
             return
+        resource_lock.release()
     
 
 
@@ -59,9 +66,15 @@ class node_init_API(Resource):
     def __init__(self):
         global resources
         self.resources = resources
+        global resource_lock
+        self.resource_lock = resource_lock
+        
+
     def get(self):
         id = str(uuid.uuid4())
+        self.resource_lock.acquire()
         self.resources.CLIENTS[id] = {}
+        self.resource_lock.release()
         repo = cf.ARGON_URL
         resp = {
             'client_id': id,
@@ -73,8 +86,11 @@ class distributor_API(Resource):
     def __init__(self):
         global resources
         self.resources = resources
+        global resource_lock
+        self.resource_lock = resource_lock
 
     def get(self, client_id):
+        self.resource_lock.acquire()
         if not client_id in self.resources.CLIENTS:
             print('Client unauthorised as worker')
             abort(403)
@@ -87,6 +103,8 @@ class distributor_API(Resource):
         }
         self.resources.CLIENTS[client_id]['commit'] = commit
         self.resources.CLIENTS[client_id]['start_time'] = datetime.now()
+        self.resources.COMMITS_MAP[commit] = 0
+        self.resource_lock.release()
         return response
 
 
@@ -100,6 +118,7 @@ class distributor_API(Resource):
         data = request.json
         commit = data['commit']
         complexity = int(data['complexity'])
+        self.resource_lock.acquire()
         if not (commit in self.resources.COMMITS_MAP):
             print('Commit doesnt exist')
             abort(404)
@@ -109,6 +128,8 @@ class distributor_API(Resource):
         self.resources.OVERALL_COMPLEXITY += complexity 
         self.resources.COMPLETED_COMMITS += 1
         print('Overall complexity: ', self.resources.OVERALL_COMPLEXITY)
+        self.resource_lock.release()
+        
 
 
 api.add_resource(node_init_API, '/api/init')
@@ -118,6 +139,9 @@ if __name__ == '__main__':
     
     global resources
     resources = Common_resources()
+
+    global resource_lock 
+    resource_lock = threading.Lock()
 
     next_url = cf.ARGON_API_URL + '/commits'
     params = cf.PARAMS

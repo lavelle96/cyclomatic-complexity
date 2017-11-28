@@ -4,14 +4,22 @@ import os
 import subprocess
 import json
 import requests
+import time
 from format import format_node_init, format_commit_call
 
 if __name__ == '__main__':
     
-
+    print('Client running')
     #Get client id and url from server
     url = format_node_init(cf.MASTER_PORT)
-    response = requests.get(url)
+    server_running = False
+    while(not server_running):
+        try:
+            response = requests.get(url)
+            server_running = True
+        except:
+            print('Waiting for server')
+            time.sleep(0.5)
     response_d = response.content.decode()
     response_j = json.loads(response_d)
     client_id = response_j['client_id']
