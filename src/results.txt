@@ -1,0 +1,11 @@
+number of clients: 2  time_taken: 24.040453672409058
+number of clients: 1  time_taken: 37.0591676235199
+number of clients: 2  time_taken: 24.03958821296692
+number of clients: 1  time_taken: 38.064441442489624
+number of clients: 3  time_taken: 31.054953813552856
+number of clients: 3  time_taken: 27.039191722869873
+number of clients: 3  time_taken: 28.058223247528076
+number of clients: 2  time_taken: 31.051380157470703
+number of clients: 2  time_taken: 29.04703402519226
+number of clients: 4  time_taken: 25.046053171157837
+number of clients: 5  time_taken: 27.044501543045044

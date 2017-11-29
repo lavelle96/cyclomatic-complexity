@@ -1,13 +1,9 @@
 #!/bin/bash
-number_of_clients=2
+num_iters=$1
 
-python master.py &
-for i in {0..$number_of_clients}
+for i in $( seq 1 $num_iters ) 
 do 
-    python worker.py &
+    ./run_n_clients.sh $i 
+    wait
 done
-
-
-
-
 

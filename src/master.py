@@ -46,20 +46,41 @@ def end_check():
         time.sleep(1)
         resource_lock.acquire()
         print('Commits completed: ', resources.COMPLETED_COMMITS)
-        if resources.COMMIT_COUNT == resources.COMPLETED_COMMITS:
+        if resources.COMMIT_COUNT <= resources.COMPLETED_COMMITS:
+            print('Closing server')
             end = time.time()
             time_taken = end-start #Recorded in seconds
             no_clients = len(resources.CLIENTS)
-            print("Final Complexity over ", resources.COMMIT_COUNT, " commits: ", resources.OVERALL_COMPLEXITY)
-            
-            print("Time taken: ", str(time_taken), " seconds")
-            print("No of clients used: ", str(no_clients))
+            try:
+                with open("results.txt", "a") as myfile:
+                    result = 'number of clients: ' + str(no_clients) + '  time_taken: ' + str(time_taken) + '\n'
+                    myfile.write(result)
+            except:
+                print('problem writing to file')
             resource_lock.release()
             os.system("killall -KILL python")
-            sys.exit()
+           
             return
         resource_lock.release()
     
+def node_check():
+    global resources
+    global resource_lock
+
+    while(1):
+        resource_lock.acquire()
+        now = datetime.now()
+        for client in resources.CLIENTS:
+            #CHeck the time stamp diff with now
+            if len(resources.CLIENTS[client]) > 0:
+                time_diff = (now-resources.CLIENTS[client]['start_time']).total_seconds()
+                if time_diff > cf.ALLOWED_TIME_DIFF:
+                    commit = resources.CLIENTS[client]['commit']
+                    resources.COMMITS_MAP[commit] = None
+
+        resource_lock.release()
+        time.sleep(2)
+
 
 
 class node_init_API(Resource):
@@ -122,12 +143,14 @@ class distributor_API(Resource):
         if not (commit in self.resources.COMMITS_MAP):
             print('Commit doesnt exist')
             abort(404)
-        self.resources.COMMITS_MAP[commit] = complexity
-        print('Complexity Received: ', complexity)
+        
         self.resources.CLIENTS[client_id] = {}
-        self.resources.OVERALL_COMPLEXITY += complexity 
-        self.resources.COMPLETED_COMMITS += 1
-        print('Overall complexity: ', self.resources.OVERALL_COMPLEXITY)
+        
+        if self.resources.COMMITS_MAP[commit] == None or self.resources.COMMITS_MAP[commit] == 0:
+            self.resources.COMMITS_MAP[commit] = complexity
+            self.resources.OVERALL_COMPLEXITY += complexity 
+            self.resources.COMPLETED_COMMITS += 1
+
         self.resource_lock.release()
         
 
@@ -161,8 +184,11 @@ if __name__ == '__main__':
             next_url = ''
     
 
-    t = threading.Thread(target=end_check)
-    t.start()
+    end_check_thread = threading.Thread(target=end_check)
+    end_check_thread.start()
+
+    node_check_thread = threading.Thread(target=node_check)
+    node_check_thread.start()
 
     server_port = cf.MASTER_PORT
     app.run('0.0.0.0', server_port)

@@ -5,6 +5,7 @@ import subprocess
 import json
 import requests
 import time
+import sys
 from format import format_node_init, format_commit_call
 
 if __name__ == '__main__':
@@ -39,10 +40,16 @@ if __name__ == '__main__':
     while(1):
 
         
-        response = requests.get(url)
+        try:
+            response = requests.get(url)
+        except:
+            print('Closing client')
+            break
+
         response_j = json.loads(response.content.decode())
         sha = response_j['sha']
         if sha == None:
+            print('Closing client')
             break
         p = subprocess.Popen(['git', 'checkout', sha], cwd=client_id)
         p.wait()
@@ -55,12 +62,16 @@ if __name__ == '__main__':
                 block = b['blocks']
                 for element in block:
                     total_complexity += element['complexity']
-        print('About to send total complexity: ', total_complexity)
         response = {
             'commit': sha,
             'complexity': total_complexity
         }
-        requests.post(url, data=json.dumps(response), headers=headers)
+        try:
+            requests.post(url, data=json.dumps(response), headers=headers)
+        except:
+            print('Closing Client')
+            break
+            
     
     
     
