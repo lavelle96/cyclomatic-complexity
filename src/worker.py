@@ -14,6 +14,7 @@ if __name__ == '__main__':
     #Get client id and url from server
     url = format_node_init(cf.MASTER_PORT)
     server_running = False
+    print('sending get to : ', url)
     while(not server_running):
         try:
             response = requests.get(url)
@@ -45,7 +46,7 @@ if __name__ == '__main__':
         except:
             print('Closing client')
             break
-
+        
         response_j = json.loads(response.content.decode())
         sha = response_j['sha']
         if sha == None:
