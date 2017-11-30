@@ -1,4 +1,3 @@
-import pygit2
 import config as cf
 import os
 import subprocess
@@ -32,8 +31,9 @@ if __name__ == '__main__':
     path = client_id
     if not os.path.exists(path):
         os.makedirs(path)
-    repo = pygit2.clone_repository(repo_url, path)
-
+    
+    p1 = subprocess.Popen(['git', 'clone', repo_url, path])
+    p1.wait()
 
     url = format_commit_call(cf.MASTER_PORT, client_id)
     headers =  {'content-type': 'application/json'}
