@@ -3,6 +3,8 @@
 This was a Cloud computing task given in the module 'Internet Applications'. I used the [Argon library](https://github.com/rubik/argon) to calculate the cyclomatic complexity of the [Argon library](https://github.com/rubik/argon) written in python
 
 ## Run
+The argon library must be installed first for each worker, information on this installation can be found on their [github page](https://github.com/rubik/argon)
+
 If running remotely, fill in the MASTER_IP in the config.py file, also set the commenting to remote in the format.py file.
 
 Remember to fill in your unique git token in the config.py file.
