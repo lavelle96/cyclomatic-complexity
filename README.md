@@ -2,6 +2,22 @@
 
 This was a Cloud computing task given in the module 'Internet Applications'. I used the [Argon library](https://github.com/rubik/argon) to calculate the cyclomatic complexity of the [Argon library](https://github.com/rubik/argon) written in python
 
+## Run
+If running remotely, fill in the MASTER_IP in the config.py file, also set the commenting to remote in the format.py file.
+
+Remember to fill in your unique git token in the config.py file.
+
+Other parameters that you might like to test can be done so in the config file such as the repo on which you want to perform the analysis.
+
+Run a single worker:
+python worker.py
+Run n workers:
+./run_n_clients.sh n
+
+Run a master:
+python master.py
+
+
 ## Method
 I implemented the work stealing method of distributing work, the roles of the worker and master will be explined below
 
