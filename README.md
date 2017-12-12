@@ -9,12 +9,12 @@ Remember to fill in your unique git token in the config.py file.
 
 Other parameters that you might like to test can be done so in the config file such as the repo on which you want to perform the analysis.
 
-Run a single worker:
+-Run a single worker:
 python worker.py
-Run n workers:
+-Run n workers:
 ./run_n_clients.sh n
 
-Run a master:
+-Run a master:
 python master.py
 
 
