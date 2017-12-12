@@ -14,10 +14,6 @@ import time
 import os
 
 
-#TODO: Implement lock structure on all resources
-#TODO: Thread that checks whether or not the clients are taking too long on a commit and resetting the commits variable to None if they are allowing
-        #it to be operated on by another client
-
 
 app = Flask(__name__)
 api = Api(app)
@@ -45,7 +41,6 @@ def end_check():
         
         time.sleep(1)
         resource_lock.acquire()
-        print('Commits completed: ', resources.COMPLETED_COMMITS)
         if resources.COMMIT_COUNT <= resources.COMPLETED_COMMITS:
             print('Closing server')
             end = time.time()
@@ -55,6 +50,11 @@ def end_check():
                 with open("results.txt", "a") as myfile:
                     result = 'number of clients: ' + str(no_clients) + '  time_taken: ' + str(time_taken) + '\n'
                     myfile.write(result)
+                    
+                with open("Complexities.txt", "a") as myfile2:
+                    for comp in resources.COMMITS_MAP:
+                        com = resources.COMMITS_MAP[comp]
+                        myfile2.write(str(com) + '\n')
             except:
                 print('problem writing to file')
             resource_lock.release()
@@ -192,19 +192,3 @@ if __name__ == '__main__':
 
     server_port = cf.MASTER_PORT
     app.run('0.0.0.0', server_port)
-    '''
-
-    response = requests.get('https://github.com/rubik/argon/archive/37e1c85cedb3485473fa4506aaf4d1fada43e606.zip', params = params)
-    response_d = response.content
-    print(response_d)
-
-    date_raw = commit['commit']['author']['date'] 
-            #"2016-06-22T06:54:51Z"
-            date = datetime.strptime(date_raw, "%Y-%m-%dT%H:%M:%SZ")
-            if date < earliest_date:
-                earliest_date = date
-                earliest_commit = commit['sha']
-            commit_count+=1
-            commit_list.append(commit['sha'])
-
-'''

@@ -54,7 +54,7 @@ if __name__ == '__main__':
             break
         p = subprocess.Popen(['git', 'checkout', sha], cwd=client_id)
         p.wait()
-        response = subprocess.check_output(['argon', '--json', '--min', '2', client_id + '/src'])
+        response = subprocess.check_output(['argon', '--json', '--min', '2', client_id]) #+ '/src'])
         j_response = json.loads(response.decode())
         total_complexity = 0
 
