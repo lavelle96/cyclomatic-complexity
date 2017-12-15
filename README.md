@@ -11,6 +11,7 @@ Remember to fill in your unique git token in the config.py file.
 
 Other parameters that you might like to test can be done so in the config file such as the repo on which you want to perform the analysis.
 
+Execution:
 - Run a single worker:
 python worker.py
 - Run n workers:
@@ -21,7 +22,7 @@ python master.py
 
 
 ## Method
-I implemented the work stealing method of distributing work, the roles of the worker and master will be explined below
+I implemented the work stealing method of distributing work, the roles of the worker and master will be explained below
 
 ### Worker
 - When a worker starts up it sends a get request to the master api looking for an id (for future identification) and the url of the repo it will be getting the cyclomatic complexity of.
